@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Natalidad en Argentina 2000–2026 · Dashboard Ciencia de Datos y ML</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+  --bg: #020617;
+  --cd: rgba(15, 23, 42, 0.84);
+  --cd-hover: rgba(30, 41, 59, 0.92);
+  --bd: rgba(148, 163, 184, 0.22);
+  --tx: #f1f5f9;
+  --mu: #94a3b8;
+  --accent: #22d3ee;
+}
+body.light {
+  --bg: #f1f5f9;
+  --cd: rgba(255, 255, 255, 0.94);
+  --cd-hover: rgba(255, 255, 255, 1);
+  --bd: rgba(100, 116, 139, 0.28);
+  --tx: #0f172a;
+  --mu: #475569;
+  --accent: #0284c7;
+}
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  transition: font-size 0.25s ease;
+}
+/* Modo Proyección Expo: amplía toda la interfaz proporcionalmente */
+html.expo-scale {
+  font-size: 18.5px;
+}
+body {
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(at 10% 10%, rgba(34, 211, 238, 0.08) 0px, transparent 45%),
+    radial-gradient(at 90% 15%, rgba(167, 139, 250, 0.08) 0px, transparent 45%),
+    radial-gradient(at 50% 90%, rgba(52, 211, 153, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--tx);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Tarjetas Glassmorphism + Animaciones CSS3 */
+.card {
+  background: var(--cd);
+  border: 1px solid var(--bd);
+  border-radius: 1.15rem;
+  padding: 1.25rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+.card:hover {
+  border-color: rgba(34, 211, 238, 0.38);
+  box-shadow: 0 14px 36px -10px rgba(34, 211, 238, 0.12);
+}
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  animation: kpiIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+}
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+@keyframes kpiIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Controles, Selectores y Botones más grandes y legibles */
+select, input[type="text"], input:not([type]), .b {
+  background: var(--cd);
+  border: 1px solid var(--bd);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.8rem;
+  color: var(--tx);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+}
+select:focus, input:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+}
+option {
+  background: var(--bg);
+  color: var(--tx);
+}
+.b {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  user-select: none;
+}
+.b:hover {
+  border-color: #22d3ee;
+  color: #22d3ee;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.15);
+}
+.b:active {
+  transform: translateY(0);
+}
+.b.on {
+  background: rgba(34, 211, 238, 0.16);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+body.light .b.on {
+  background: rgba(2, 132, 199, 0.14);
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+/* Textos secundarios y etiquetas (más grandes para proyector) */
+.mu {
+  color: var(--mu);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.filter-label {
+  color: var(--mu);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Badges y Chips */
+.bd {
+  font-size: 0.82rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.dn { background: rgba(52, 211, 153, 0.18); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.35); }
+.up { background: rgba(251, 113, 133, 0.18); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.35); }
+.ml { background: rgba(167, 139, 250, 0.22); color: #c4b5fd; border: 1px solid rgba(167, 139, 250, 0.4); }
+body.light .dn { color: #059669; }
+body.light .up { color: #e11d48; }
+body.light .ml { color: #6d28d9; }
+
+.chip {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  background: rgba(34, 211, 238, 0.14);
+  border: 1px solid rgba(34, 211, 238, 0.45);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.chip:hover {
+  background: rgba(34, 211, 238, 0.24);
+  transform: scale(1.03);
+}
+.chip b {
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.75;
+}
+.chip b:hover {
+  opacity: 1;
+  color: #fb7185;
+}
+
+/* Slider del Mapa */
+input[type="range"] {
+  accent-color: #22d3ee;
+  cursor: pointer;
+  height: 6px;
+}
+.year-pill {
+  background: rgba(34, 211, 238, 0.16);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  color: #22d3ee;
+  padding: 0.2rem 0.7rem;
+  border-radius: 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+}
+.year-pill.playing {
+  animation: pulseGlow 1s infinite alternate;
+}
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 4px rgba(34, 211, 238, 0.3); transform: scale(1); }
+  to { box-shadow: 0 0 16px rgba(34, 211, 238, 0.75); transform: scale(1.06); }
+}
+
+/* Indicador de estado en vivo */
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+.live-dot.ok {
+  background: #34d399;
+  box-shadow: 0 0 10px #34d399;
+  animation: blink 2s infinite;
+}
+.live-dot.warn {
+  background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.88); }
+}
+
+/* Tabla Matriz de Calor mejorada para Expo */
+#tw {
+  max-height: 600px;
+  overflow: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--bd);
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.88rem;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  padding: 0.45rem 0.65rem;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+td:not(:first-child):hover {
+  filter: brightness(1.22);
+  font-weight: 700;
+  outline: 2px solid #22d3ee;
+  z-index: 4;
+  position: relative;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  cursor: pointer;
+  z-index: 2;
+  font-weight: 700;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+th:hover {
+  color: #22d3ee;
+}
+th:first-child, td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+  text-align: left;
+  z-index: 3;
+  font-weight: 700;
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+  border-right: 1px solid var(--bd);
+}
+tbody tr:hover td:first-child {
+  color: #22d3ee;
+}
+.proj {
+  border-left: 2px dashed #a78bfa;
+}
+th.proj {
+  color: #c4b5fd;
+  background: rgba(76, 29, 149, 0.35);
+}
+body.light th.proj {
+  color: #6d28d9;
+  background: rgba(237, 233, 254, 0.9);
+}
+
+/* Spinner y Modal */
+.spin {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid var(--bd);
+  border-top-color: #22d3ee;
+  border-radius: 50%;
+  animation: s 0.75s linear infinite;
+  display: inline-block;
+}
+@keyframes s { to { transform: rotate(360deg); } }
+
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+</style>
+</head>
+<body class="p-3 md:p-6">
+
+<header class="flex flex-wrap items-center justify-between gap-4 mb-5 pb-3 border-b border-slate-800/80">
+  <div>
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider mb-1.5">
+      <span>🎓 Proyecto Integrador · Ciencia de Datos & Machine Learning</span>
+    </div>
+    <h1 class="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-teal-200 to-violet-400 bg-clip-text text-transparent">
+      Tasa Bruta de Natalidad · Argentina 2000–2026
+    </h1>
+    <p class="mu mt-0.5">
+      Nacidos vivos por cada 1.000 habitantes (‰) · Fuente Oficial: DEIS, Ministerio de Salud · Proyecciones 2025–2026 con Machine Learning
+    </p>
+  </div>
+  <div class="flex flex-wrap items-center gap-2.5">
+    <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 border border-slate-700/50">
+      <span id="status" class="mu"></span>
+      <span id="spin" class="spin" hidden></span>
+    </div>
+    <button class="b" id="bSync" title="Sincronizar ahora con Google Sheets">🔄 Sincronizar Datos</button>
+    <select id="auto" class="b" title="Actualización automática de datos desde Google Sheets">
+      <option value="0">⏱ Auto: desactivado</option>
+      <option value="30">⏱ Cada 30 seg</option>
+      <option value="60">⏱ Cada 1 min</option>
+      <option value="300">⏱ Cada 5 min</option>
+      <option value="900">⏱ Cada 15 min</option>
+    </select>
+    <button class="b" id="bExpo" title="Aumentar tamaño de letra para proyector o TV en la Expo">🔍 Modo Expo (A+)</button>
+    <button class="b on" id="bSnd" title="Activar o silenciar efectos de sonido interactivos">🔊 Sonido</button>
+    <button class="b" id="bCfg" title="Configurar link de Google Apps Script">🔗 Fuente Apps Script</button>
+    <button class="b" id="bTheme" title="Cambiar entre modo oscuro y claro">🌗 Tema</button>
+  </div>
+</header>
+
+<section class="card mb-5 flex flex-wrap gap-x-4 gap-y-3 items-end" style="position:sticky;top:8px;z-index:30">
+  <label class="filter-label">Desde<select id="from"></select></label>
+  <label class="filter-label">Hasta<select id="to"></select></label>
+  <div class="flex flex-wrap gap-1.5">
+    <button class="b on" data-r="2000,2026">Todo 2000–2026</button>
+    <button class="b" data-r="2000,2014">Pre-Quiebre 2000–2014</button>
+    <button class="b" data-r="2014,2024">Post-Quiebre 2014–2024</button>
+    <button class="b" data-r="2024,2026">Proyección ML 2024–2026</button>
+  </div>
+  <label class="filter-label">Jurisdicción principal<select id="main"></select></label>
+  <label class="filter-label">Comparar con<select id="add"></select></label>
+  <label class="filter-label">Región<select id="region"><option>Todas</option><option>NOA</option><option>NEA</option><option>Cuyo</option><option>Centro</option><option>Patagonia</option></select></label>
+  <label class="filter-label">Métrica (mapa y rankings)<select id="metric"><option value="prom">Promedio del período</option><option value="anio">Año específico</option><option value="var">Variación % en el período</option></select></label>
+  <label class="filter-label" id="myWrap">Año<select id="my"></select></label>
+  <label class="filter-label">Método de proyección ML<select id="method"><option value="break">Regresión lineal · quiebre 2014–2024</option><option value="full">Regresión lineal · serie 2000–2024</option><option value="holt">Suavizado exponencial (Holt)</option></select></label>
+  <div id="chips" class="flex flex-wrap items-center gap-2 w-full pt-1 border-t border-slate-800/60"></div>
+</section>
+
+<section id="kpis" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 mb-5"></section>
+
+<section class="grid lg:grid-cols-2 gap-5 mb-5">
+  <div class="card">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <div>
+        <h2 class="text-lg md:text-xl font-bold">🗺️ Mapa de Calor por Jurisdicción</h2>
+        <p class="mu">Hacé clic en cualquier provincia para analizarla en todo el dashboard</p>
+      </div>
+      <div class="flex items-center gap-2.5 bg-slate-900/50 px-3 py-1.5 rounded-xl border border-slate-700/50">
+        <button class="b on" id="play">▶ Play</button>
+        <input type="range" id="msl" min="2000" max="2026" value="2024" class="w-28 md:w-36">
+        <span id="mylab" class="year-pill">2024</span>
+      </div>
+    </div>
+    <div id="map" style="height:580px"></div>
+  </div>
+  <div class="card">
+    <div class="mb-3">
+      <h2 class="text-lg md:text-xl font-bold">📈 Evolución Histórica (2000–2024) + Proyección ML (2025–2026)</h2>
+      <p class="mu">Línea continua: datos oficiales DEIS · Línea punteada y banda violeta: proyección Machine Learning</p>
+    </div>
+    <div id="line" style="height:580px"></div>
+  </div>
+</section>
+
+<section class="grid lg:grid-cols-2 gap-5 mb-5">
+  <div class="card">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <div>
+        <h2 class="text-lg md:text-xl font-bold">🏆 Ranking y Comparativa por Jurisdicción</h2>
+        <p class="mu">Ordenamiento dinámico según métrica o comparación de los 4 hitos clave</p>
+      </div>
+      <div class="flex gap-1.5">
+        <button class="b on" data-t="A">A · Ranking Provincial</button>
+        <button class="b" data-t="B">B · 4 Hitos Históricos</button>
+      </div>
+    </div>
+    <div id="rank" style="height:620px"></div>
+  </div>
+  <div class="card">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <div>
+        <h2 class="text-lg md:text-xl font-bold">🔬 Laboratorio de Ciencia de Datos y Regresión</h2>
+        <p class="mu">Ecuación de ajuste, R², RMSE y clustering demográfico por velocidad de caída</p>
+      </div>
+      <div class="flex gap-1.5">
+        <button class="b on" data-s="1">1 · Ajuste Modelo ML</button>
+        <button class="b" data-s="2">2 · Clustering Provincial</button>
+      </div>
+    </div>
+    <div id="sc" style="height:620px"></div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+    <div>
+      <h2 class="text-lg md:text-xl font-bold">🔥 Matriz Temporal de Calor · Jurisdicciones × Años (2000–2026)</h2>
+      <p class="mu">Hacé clic en el encabezado de cualquier año para ordenar de menor a mayor o viceversa</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <input id="q" type="text" placeholder="🔍 Buscar jurisdicción…">
+      <button class="b" id="bCsv">⬇ Exportar CSV Completo</button>
+    </div>
+  </div>
+  <div id="tw"><table id="tbl"></table></div>
+</section>
+
+<div id="modal">
+  <div class="card w-full max-w-lg" style="background:var(--bg)">
+    <h3 class="text-lg font-bold mb-2">🔗 Fuente de Datos · Google Apps Script</h3>
+    <p class="mu mb-3">Pegá la URL de tu Web App (`/exec`). Acepta un array JSON de objetos o una estructura `{data: [...]}`. Se guarda localmente en este navegador.</p>
+    <input id="url" type="text" class="w-full mb-4" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="flex justify-end gap-2">
+      <button class="b" id="mClr">Restaurar URL por defecto</button>
+      <button class="b" id="mX">Cancelar</button>
+      <button class="b on" id="mOk">Guardar y sincronizar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Sintetizador de Efectos de Sonido (Web Audio API, sin archivos externos) ---------- */
+let audioCtx = null;
+let soundEnabled = true;
+
+function playSound(type = 'click') {
+  if (!soundEnabled) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+
+    if (type === 'click') {
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.045);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.055);
+    } else if (type === 'select') {
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(740, now + 0.08);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.095);
+    } else if (type === 'tick') {
+      const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, now);
+      gain.gain.setValueAtTime(0.045, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.045);
+    } else if (type === 'mlTick') {
+      // Sonido especial cuando el mapa animado entra a 2025-2026 (Proyección ML)
+      [784, 1046.5].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+        gain.gain.setValueAtTime(0.07, now + idx * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.12);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.05); osc.stop(now + idx * 0.05 + 0.13);
+      });
+    } else if (type === 'sync') {
+      // Acorde suave ascendente al sincronizar con éxito
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+        gain.gain.setValueAtTime(0.055, now + idx * 0.055);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.16);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.055); osc.stop(now + idx * 0.055 + 0.17);
+      });
+    }
+  } catch (e) {}
+}
+
+/* ---------- Carga de librerías con CDN alternativos ---------- */
+let libErr = '';
+const CDN = f => [`https://code.highcharts.com/11.4.8/${f}`, `https://cdn.jsdelivr.net/npm/highcharts@11.4.8/${f}`, `https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.8/${f}`];
+const addScript = u => new Promise((ok, no) => { const e = document.createElement('script'); e.src = u; e.onload = ok; e.onerror = () => no(u); document.head.appendChild(e); });
+async function loadFirst(urls){ for(const u of urls){ try { await addScript(u); return u; } catch(e){ console.warn('No cargó', u); } } throw new Error(urls[0].split('/').pop()); }
+async function loadLibs(){
+  try { for(const f of ['highcharts.js','highcharts-more.js','modules/map.js']) await loadFirst(CDN(f)); }
+  catch(e){ libErr = 'no cargó ' + e.message + ' desde ningún CDN'; return; }
+  try { await loadFirst(CDN('modules/exporting.js')); } catch(e){}
+  try { await loadFirst(['https://code.highcharts.com/mapdata/countries/ar/ar-all.js','https://cdn.jsdelivr.net/npm/@highcharts/map-collection@2/countries/ar/ar-all.js']); }
+  catch(e){
+    try { Highcharts.maps['countries/ar/ar-all'] = await (await fetch('https://code.highcharts.com/mapdata/countries/ar/ar-all.topo.json')).json(); }
+    catch(_){ libErr = 'no cargaron los datos geográficos del mapa'; }
+  }
+}
+
+const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz337nMaMDFE7pkBnRGCycbY6Y6Agy23dbTEXuXlmHGPh4Q1sWNpgSZFcZphRmoCxou/exec";
+
+const FALLBACK_CSV_DATA = `indice_tiempo,natalidad_argentina,natalidad_ciudad_autonoma_de_buenos_aires,natalidad_buenos_aires,natalidad_catamarca,natalidad_cordoba,natalidad_corrientes,natalidad_chaco,natalidad_chubut,natalidad_entre_rios,natalidad_formosa,natalidad_jujuy,natalidad_la_pampa,natalidad_la_rioja,natalidad_mendoza,natalidad_misiones,natalidad_neuquen,natalidad_rio_negro,natalidad_salta,natalidad_san_juan,natalidad_san_luis,natalidad_santa_cruz,natalidad_santa_fe,natalidad_santiago_del_estero,natalidad_tucuman,natalidad_tierra_del_fuego
+01-01-2000,19.0,14.3,17.5,25.8,17.2,22.7,25.8,19.4,21.3,25.7,22.6,18.1,22.6,19.2,25.8,17.9,18.9,24.0,22.7,22.3,19.6,16.9,21.6,22.6,19.9
+01-01-2001,18.2,13.9,16.9,24.9,15.9,21.9,22.2,18.4,20.5,22.4,23.1,17.2,20.5,19.1,24.2,16.8,17.8,24.2,23.7,22.3,19.8,16.2,21.1,21.1,17.9
+01-01-2002,18.3,13.6,17.0,24.4,16.6,23.3,24.9,17.1,19.5,25.1,22.1,16.7,21.4,16.9,22.9,16.1,17.3,24.7,22.3,22.0,19.2,16.7,22.1,22.6,17.2
+01-01-2003,18.4,14.2,17.3,22.5,17.5,22.2,20.9,18.7,19.8,25.0,20.3,18.3,21.2,17.5,24.1,19.4,18.6,22.0,22.2,21.7,21.9,17.3,17.8,21.8,20.8
+01-01-2004,19.3,14.9,18.5,20.6,17.8,22.7,25.1,19.3,19.5,26.5,21.3,17.4,21.1,18.4,26.4,19.8,18.3,23.9,22.5,21.9,22.4,17.6,19.7,21.0,19.5
+01-01-2005,18.5,14.5,17.9,19.7,17.1,20.2,22.6,19.2,19.0,23.5,19.9,16.9,20.8,18.8,23.0,20.0,18.7,22.5,21.4,19.9,22.9,16.3,21.0,19.9,20.7
+01-01-2006,17.9,14.6,17.7,18.3,16.5,18.7,19.6,20.0,17.2,21.4,18.4,16.5,19.0,19.0,19.9,20.5,18.6,21.0,20.7,20.2,23.5,15.8,20.0,18.5,20.1
+01-01-2007,17.8,14.1,17.7,18.3,16.3,18.9,18.4,20.2,16.9,21.1,18.6,16.2,18.4,19.3,20.4,20.5,18.9,20.6,20.8,19.3,23.8,15.7,19.4,19.7,20.8
+01-01-2008,18.8,15.1,18.6,18.6,17.4,19.7,20.8,21.4,17.2,22.6,19.1,16.5,19.0,20.2,23.1,21.0,19.9,21.4,20.7,19.3,25.0,16.9,20.5,19.9,20.8
+01-01-2009,18.6,14.6,18.4,17.4,17.4,19.9,20.4,21.3,17.5,21.9,19.2,16.3,17.9,19.7,23.7,20.9,19.6,21.0,20.6,18.2,25.2,16.5,21.9,19.1,20.2
+01-01-2010,18.7,14.9,18.9,16.9,17.2,19.8,21.2,21.2,17.4,21.1,19.2,16.2,17.2,19.3,22.2,21.6,20.0,21.9,19.8,17.4,26.0,16.2,19.9,20.1,18.8
+01-01-2011,18.5,14.8,18.8,16.0,16.9,19.9,22.6,20.7,17.2,21.6,19.6,15.6,17.4,19.2,19.3,19.6,19.8,21.7,19.9,16.7,25.0,16.4,20.2,19.5,18.6
+01-01-2012,17.9,14.2,18.1,15.0,16.5,18.6,20.2,20.2,16.7,21.0,18.0,15.4,17.0,18.4,22.3,19.1,19.4,20.2,19.6,16.0,24.0,16.3,17.9,18.7,19.2
+01-01-2013,17.9,14.3,17.8,16.9,16.0,19.0,19.9,18.5,17.3,21.0,18.5,16.8,17.5,18.7,22.0,18.7,17.9,21.1,20.6,16.7,19.7,16.9,18.8,18.9,19.8
+01-01-2014,18.2,14.3,17.9,17.4,16.8,19.8,20.2,17.8,17.8,21.8,19.5,16.5,17.3,19.4,23.4,19.5,17.9,21.6,21.3,16.9,19.8,17.2,19.8,19.3,20.5
+01-01-2015,17.9,13.7,17.3,17.2,16.4,19.3,22.7,17.4,17.8,21.3,18.2,15.1,17.1,18.8,22.8,19.1,18.2,21.3,20.5,17.0,19.8,16.9,20.5,19.0,19.9
+01-01-2016,16.7,13.1,16.2,16.7,15.7,18.5,19.1,16.6,16.6,19.4,16.8,15.1,16.6,17.5,21.0,17.9,16.8,19.4,18.8,15.5,18.6,16.3,18.7,17.5,18.1
+01-01-2017,16.0,11.7,15.4,15.8,15.0,18.3,19.8,15.3,16.3,19.6,15.8,14.3,15.6,16.3,21.1,16.3,16.0,19.7,18.1,14.8,17.0,15.4,18.8,16.7,16.9
+01-01-2018,15.4,11.6,14.6,16.4,14.5,18.0,21.0,14.3,15.6,19.8,15.7,13.5,14.8,15.4,20.2,15.6,14.6,18.2,17.7,14.2,14.7,14.8,18.9,16.9,16.3
+01-01-2019,13.9,11.1,13.1,13.9,13.7,16.3,18.6,12.9,14.0,17.1,13.6,12.1,13.7,13.9,18.4,14.4,13.3,16.3,16.2,13.2,13.3,13.4,17.5,15.0,14.2
+01-01-2020,11.8,9.1,10.9,11.9,11.8,14.8,15.3,11.3,12.3,15.2,11.9,10.4,11.6,11.8,16.8,12.3,11.6,12.7,14.0,11.8,11.3,11.2,14.0,12.8,10.9
+01-01-2021,11.6,8.5,10.7,11.4,11.6,13.9,15.4,10.2,11.7,14.5,10.8,9.9,11.6,11.4,16.1,11.6,10.6,14.1,14.1,11.7,9.4,12.2,13.8,12.8,9.9
+01-01-2022,10.7,8.0,9.7,11.3,10.8,12.6,14.7,9.6,10.7,13.8,9.9,9.6,10.9,10.5,15.2,11.0,10.5,12.8,13.1,10.7,9.5,11.5,11.7,11.9,8.5
+01-01-2023,9.9,7.8,9.0,10.0,9.8,12.4,13.5,8.4,9.9,13.3,9.3,8.8,10.2,9.8,14.5,10.0,9.5,11.5,12.2,9.4,8.0,10.4,11.8,10.6,7.7
+01-01-2024,8.9,6.9,8.4,8.8,8.6,10.5,11.9,8.4,8.6,10.7,8.0,8.1,8.7,9.1,12.3,9.7,8.6,9.7,10.3,8.3,8.1,9.2,10.8,9.4,6.9`;
+
+/* ---------- Diccionario geográfico (col = "natalidad_" + slug) ---------- */
+const META = [
+ ["ciudad_autonoma_de_buenos_aires","CABA","Centro / AMBA","ar-df"],["buenos_aires","Buenos Aires","Centro / AMBA","ar-ba"],
+ ["catamarca","Catamarca","NOA","ar-ct"],["cordoba","Córdoba","Centro","ar-cb"],["corrientes","Corrientes","NEA","ar-cn"],
+ ["chaco","Chaco","NEA","ar-cc"],["chubut","Chubut","Patagonia","ar-ch"],["entre_rios","Entre Ríos","Centro","ar-er"],
+ ["formosa","Formosa","NEA","ar-fm"],["jujuy","Jujuy","NOA","ar-jy"],["la_pampa","La Pampa","Patagonia / Centro","ar-lp"],
+ ["la_rioja","La Rioja","NOA","ar-lr"],["mendoza","Mendoza","Cuyo","ar-mz"],["misiones","Misiones","NEA","ar-mn"],
+ ["neuquen","Neuquén","Patagonia","ar-nq"],["rio_negro","Río Negro","Patagonia","ar-rn"],["salta","Salta","NOA","ar-sa"],
+ ["san_juan","San Juan","Cuyo","ar-sj"],["san_luis","San Luis","Cuyo","ar-sl"],["santa_cruz","Santa Cruz","Patagonia","ar-sc"],
+ ["santa_fe","Santa Fe","Centro","ar-sf"],["santiago_del_estero","Santiago del Estero","NOA","ar-se"],
+ ["tucuman","Tucumán","NOA","ar-tm"],["tierra_del_fuego","Tierra del Fuego","Patagonia","ar-tf"]
+].map(([s,n,r,h]) => ({col:"natalidad_"+s, nombre:n, region:r, hcKey:h}));
+const ARG = {col:"natalidad_argentina", nombre:"Total Argentina", region:"Nacional", hcKey:null};
+const ALL = [ARG, ...META], byCol = {}; ALL.forEach(j => byCol[j.col] = j);
+const NAMES = {break:"Regresión lineal · quiebre 2014–2024", full:"Regresión lineal · serie 2000–2024", holt:"Suavizado exponencial (Holt)"};
+const PAL = ['#22d3ee','#34d399','#a78bfa','#fbbf24','#f472b6','#fb7185','#60a5fa','#a3e635'];
+const RCOL = {Centro:'#22d3ee', NOA:'#34d399', NEA:'#a78bfa', Cuyo:'#fbbf24', Patagonia:'#fb7185'};
+
+/* ---------- Estado ---------- */
+let DATA = {}, TIPO = {}, MODEL = {}, YEARS = [], LASTOFF = 2024, sheetProj = false, src = 'f', stamp = '';
+const S = {from:2000, to:2026, main:ARG.col, sel:[ARG.col,'natalidad_misiones','natalidad_jujuy','natalidad_ciudad_autonoma_de_buenos_aires'],
+  region:'Todas', metric:'prom', my:2024, method:'break', tab:'A', sc:1, dark:true, expo:false};
+let errMsg = '', mapC = null, sortK = null, sortD = 1, timer = null;
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const avgA = a => a.reduce((s,v) => s+v, 0) / a.length;
+const sd = a => { const m = avgA(a); return Math.sqrt(avgA(a.map(v => (v-m)**2))); };
+const med = a => { const s = [...a].sort((x,y) => x-y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h-1]+s[h])/2; };
+const V = (c,y) => DATA[c][y];
+const rng = (c,a=S.from,b=S.to) => { const r=[]; for(let y=a;y<=b;y++) if(V(c,y)!=null) r.push(V(c,y)); return r; };
+const f1 = v => (v==null || isNaN(v)) ? '–' : v.toFixed(1);
+const provs = () => META.filter(j => S.region==='Todas' || j.region.includes(S.region));
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e) { return null; } };
+const lsSet = (k,v) => { try { v==null ? localStorage.removeItem(k) : localStorage.setItem(k,v); } catch(e) {} };
+function metric(c){
+  if(S.metric==='anio') return V(c,S.my);
+  if(S.metric==='prom') return avgA(rng(c));
+  return (V(c,S.to)-V(c,S.from))/V(c,S.from)*100;
+}
+const fmtM = v => S.metric==='var' ? v.toFixed(1)+' %' : f1(v)+' ‰';
+const mLabel = () => S.metric==='prom' ? `Promedio ${S.from}–${S.to} (‰)` : S.metric==='anio' ? `Año ${S.my}${TIPO[S.my]!=='Oficial'?' (proy. ML)':''} (‰)` : `Variación % ${S.from}→${S.to}`;
+const badge = v => `<span class="bd ${v<0?'dn':'up'}">${v<0?'▼':'▲'} ${Math.abs(v).toFixed(1)}%</span>`;
+const C = () => S.dark ? {tx:'#e2e8f0', gr:'#334155', ttBg:'rgba(15,23,42,0.95)'} : {tx:'#1e293b', gr:'#cbd5e1', ttBg:'rgba(255,255,255,0.96)'};
+const heat = v => { const t = Math.max(0, Math.min(1, (v-5)/22)); return `hsl(${260-260*t},65%,${S.dark?30:74}%)`; };
+
+function base(x){
+  const c = C();
+  return Highcharts.merge({
+    chart:{backgroundColor:'transparent', style:{fontFamily:'Plus Jakarta Sans, sans-serif'}},
+    title:{text:null},
+    credits:{enabled:false},
+    legend:{itemStyle:{color:c.tx, fontSize:'13px', fontWeight:'600'}, itemHoverStyle:{color:'#22d3ee'}},
+    tooltip:{
+      backgroundColor:c.ttBg,
+      borderColor:'#22d3ee',
+      borderRadius:10,
+      style:{color:c.tx, fontSize:'13.5px'}
+    },
+    xAxis:{
+      labels:{style:{color:c.tx, fontSize:'12.5px', fontWeight:'500'}},
+      lineColor:c.gr, tickColor:c.gr,
+      title:{style:{color:c.tx, fontSize:'13.5px', fontWeight:'600'}}
+    },
+    yAxis:{
+      title:{style:{color:c.tx, fontSize:'13.5px', fontWeight:'600'}},
+      labels:{style:{color:c.tx, fontSize:'12.5px', fontWeight:'500'}},
+      gridLineColor:c.gr
+    }
+  }, x);
+}
+
+/* ---------- Datos: parseo, ingesta y motor predictivo ---------- */
+function parseCSV(t){
+  const L = t.trim().split(/\r?\n/), H = L[0].split(',');
+  return L.slice(1).map(l => { const p = l.split(','), o = {}; H.forEach((h,i) => o[h] = p[i]); return o; });
+}
+function ingest(rows){
+  DATA = {}; TIPO = {}; ALL.forEach(j => DATA[j.col] = {});
+  rows.forEach(r => {
+    const o = {}; for(const k in r) o[k.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[\s-]+/g,'_')] = r[k];
+    const m = String(o.indice_tiempo || '').match(/\d{4}/); if(!m) return;
+    const y = +m[0]; let any = false;
+    ALL.forEach(j => { const v = parseFloat(String(o[j.col]).replace(',','.')); if(!isNaN(v)){ DATA[j.col][y] = v; any = true; } });
+    if(any) TIPO[y] = y >= 2025 ? 'Proyección ML (Sheet)' : 'Oficial';
+  });
+  if(!Object.keys(TIPO).length) throw new Error('El Sheet no tiene filas con indice_tiempo y columnas natalidad_* reconocidas');
+  LASTOFF = Math.max(...Object.keys(TIPO).filter(y => TIPO[y]==='Oficial').map(Number));
+  sheetProj = TIPO[2025]==='Proyección ML (Sheet)' && TIPO[2026]==='Proyección ML (Sheet)';
+  project();
+}
+function lin(xs, ys){
+  const n = xs.length, mx = avgA(xs), my = avgA(ys); let sxy = 0, sxx = 0, se = 0, st = 0;
+  xs.forEach((x,i) => { sxy += (x-mx)*(ys[i]-my); sxx += (x-mx)**2; });
+  const m = sxy/sxx, b = my - m*mx;
+  xs.forEach((x,i) => { se += (ys[i]-(m*x+b))**2; st += (ys[i]-my)**2; });
+  return {m, b, r2:1-se/st, rmse:Math.sqrt(se/n)};
+}
+function fitModel(d, method){
+  const a = method==='full' ? 2000 : 2014, xs = [], ys = [];
+  for(let y=a; y<=LASTOFF; y++) if(y in d){ xs.push(y); ys.push(d[y]); }
+  const L = {...lin(xs,ys), a};
+  if(method !== 'holt') return {...L, pred: y => Math.max(0, L.m*y + L.b)};
+  const A = .8, B = .4, my = avgA(ys); let l = ys[0], t = ys[1]-ys[0], se = 0, st = 0;
+  for(let i=1; i<ys.length; i++){
+    const f = l+t; se += (ys[i]-f)**2; st += (ys[i]-my)**2;
+    const ln = A*ys[i] + (1-A)*f; t = B*(ln-l) + (1-B)*t; l = ln;
+  }
+  return {...L, r2:1-se/st, rmse:Math.sqrt(se/(ys.length-1)), pred: y => Math.max(0, l + (y-LASTOFF)*t)};
+}
+function project(){
+  MODEL = {};
+  ALL.forEach(j => {
+    const d = DATA[j.col], fit = fitModel(d, S.method); MODEL[j.col] = fit;
+    [2025,2026].forEach(y => {
+      if(TIPO[y]==='Proyección ML (Sheet)' && y in d) return;
+      d[y] = fit.pred(y);
+    });
+  });
+  [2025,2026].forEach(y => { if(TIPO[y] !== 'Proyección ML (Sheet)') TIPO[y] = 'Proyección ML (JS)'; });
+  YEARS = Object.keys(TIPO).map(Number).sort((a,b) => a-b);
+}
+let syncing = false, autoTimer = null;
+async function sync(isManual = false){
+  if(syncing) return; syncing = true;
+  const url = lsGet('apps_url') || DEFAULT_APPS_SCRIPT_URL, sp = $('spin');
+  sp.hidden = false; let rows;
+  try {
+    if(!url || url.startsWith('PEGAR_AQUI')) throw 0;
+    const resp = await fetch(url); if(!resp.ok) throw new Error('HTTP '+resp.status+' al consultar la URL');
+    const j = await resp.json();
+    rows = Array.isArray(j) ? j : (j.data || j.rows || []);
+    if(!rows.length) throw 1;
+    errMsg = ''; ingest(rows); src = 'g';
+    if(isManual) playSound('sync');
+  } catch(e){
+    errMsg = e===0 ? '' : e===1 ? 'La URL respondió pero sin filas de datos' :
+      e instanceof SyntaxError ? 'La URL devolvió una página HTML en vez de JSON: implementá la Web App con acceso "Cualquier usuario" y usá la URL que termina en /exec' :
+      e instanceof TypeError ? 'No se pudo acceder a la URL: revisá que sea la URL /exec y que el acceso sea "Cualquier usuario"' : (e.message || String(e));
+    console.warn('Sync fallido:', e);
+    if(!(src === 'g' && Object.keys(TIPO).length)){ ingest(parseCSV(FALLBACK_CSV_DATA)); src = 'f'; }
+  }
+  stamp = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  sp.hidden = true; syncing = false; render();
+}
+function setAuto(sec){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+  if(sec > 0) autoTimer = setInterval(() => sync(false), sec * 1000);
+  lsSet('auto_sec', String(sec));
+}
+
+/* ---------- KPIs ---------- */
+function drawKPI(){
+  const c = S.main, j = byCol[c], r = rng(c), M = MODEL[c];
+  const a = V(c,S.from), b = V(c,S.to), dv = b-a, pc = dv/a*100;
+  const y1 = V(c,LASTOFF), y0 = V(c,LASTOFF-1), yoy = (y1-y0)/y0*100;
+  const chg = p => (V(p.col,S.to)-V(p.col,S.from))/V(p.col,S.from)*100;
+  const rk = provs().map(p => ({p, v:metric(p.col)})).sort((x,y) => y.v-x.v), top = rk[0], low = rk[rk.length-1];
+  const K = [
+    ['📊', `Promedio ${S.from}–${S.to} · ${j.nombre}`, f1(avgA(r))+' ‰', `Mediana ${f1(med(r))} ‰ · σ = ${f1(sd(r))}`, '#22d3ee'],
+    ['📌', `Último dato oficial (${LASTOFF})`, f1(y1)+' ‰', `${badge(yoy)} vs ${LASTOFF-1}`, '#34d399'],
+    ['🤖', 'Proyección ML 2025 · 2026', `${f1(V(c,2025))} · ${f1(V(c,2026))} ‰`, `<span class="bd ml">${sheetProj?'Sheet':'JS'}</span> R² = ${M.r2.toFixed(3)} · IC95% ±${(1.96*M.rmse).toFixed(1)}`, '#a78bfa'],
+    ['📉', `Variación ${S.from}→${S.to}`, `${pc.toFixed(1)} %`, `${dv>0?'+':''}${dv.toFixed(1)} ‰ (${f1(a)} → ${f1(b)})`, '#fbbf24'],
+    ['🔝', 'Mayor natalidad · ' + mLabel().split(' (')[0], top.p.nombre, `${fmtM(top.v)} · ${top.p.region}`, '#fb7185'],
+    ['⬇️', 'Menor natalidad / mayor caída', low.p.nombre, `${fmtM(low.v)} · caída ${chg(low.p).toFixed(1)} % (${S.from}→${S.to})`, '#60a5fa']
+  ];
+  $('kpis').innerHTML = K.map((k, idx) => `
+    <div class="card kpi-card" style="border-top:4px solid ${k[4]}; animation-delay:${idx * 55}ms">
+      <div class="mu font-semibold">${k[0]} ${k[1]}</div>
+      <div class="text-2xl md:text-3xl font-extrabold my-2 tracking-tight tabular-nums" style="color:${k[4]}">${k[2]}</div>
+      <div class="mu">${k[3]}</div>
+    </div>`).join('');
+}
+
+/* ---------- Mapa ---------- */
+const mapData = () => provs().map(j => ({'hc-key':j.hcKey, value:+metric(j.col).toFixed(2), c:j.col}));
+function drawMap(){
+  const d = mapData(), vs = d.map(x => x.value);
+  const mn = S.metric==='var' ? Math.min(...vs) : 5, mx = S.metric==='var' ? Math.max(...vs) : 27;
+  if(mapC){ mapC.colorAxis[0].update({min:mn, max:mx}, false); mapC.series[0].setData(d); return; }
+  mapC = Highcharts.mapChart('map', base({
+    chart:{map:Highcharts.maps['countries/ar/ar-all']},
+    colorAxis:{min:mn, max:mx, stops:[[0,'#4c1d95'],[.3,'#2563eb'],[.55,'#14b8a6'],[.75,'#fbbf24'],[1,'#fb7185']], labels:{style:{color:C().tx, fontSize:'12px', fontWeight:'600'}}},
+    legend:{enabled:true, itemStyle:{color:C().tx, fontSize:'12.5px'}},
+    tooltip:{useHTML:true, formatter(){
+      const c = this.point.c; if(!c) return false; const j = byCol[c];
+      return `<div style="padding:4px 2px"><b style="font-size:15px;color:#22d3ee">${j.nombre}</b> · <span style="opacity:.8">${j.region}</span><br>` +
+        `Promedio 2000–${LASTOFF}: <b>${f1(avgA(rng(c,2000,LASTOFF)))} ‰</b><br>` +
+        `2000: <b>${f1(V(c,2000))} ‰</b> · ${LASTOFF}: <b>${f1(V(c,LASTOFF))} ‰</b><br>` +
+        `Proy. ML 2025: <b style="color:#a78bfa">${f1(V(c,2025))} ‰</b> · 2026: <b style="color:#a78bfa">${f1(V(c,2026))} ‰</b><br>` +
+        `Variación 2000→${LASTOFF}: <b>${((V(c,LASTOFF)-V(c,2000))/V(c,2000)*100).toFixed(1)} %</b><br>` +
+        `<i style="color:#fbbf24">${mLabel()}: ${f1(this.point.value)}</i></div>`; }},
+    series:[{data:d, joinBy:'hc-key', name:'Natalidad', nullColor:'#475569', borderColor:'#0f172a', borderWidth:1.2, states:{hover:{color:'#f59e0b', borderColor:'#ffffff'}},
+      point:{events:{click(){ if(this.c){ playSound('select'); pick(this.c); }}}}}]
+  }));
+}
+function pick(c){ S.main = c; if(!S.sel.includes(c)) S.sel.push(c); render(); }
+
+/* ---------- Línea + proyección ---------- */
+function drawLine(){
+  const ids = [...new Set([S.main, ...S.sel])], ser = [];
+  ids.forEach((c,i) => {
+    const col = PAL[i%PAL.length], h = [], p = [];
+    for(let y=S.from; y<=S.to; y++){ const v = V(c,y); if(y<=LASTOFF) h.push([y,v]); if(y>=LASTOFF) p.push([y,v]); }
+    ser.push({id:c, name:byCol[c].nombre, data:h, color:col, lineWidth:i===0?3.5:2.5, type:i===0?'areaspline':'spline', fillOpacity:.12, marker:{radius:3.5}});
+    ser.push({linkedTo:c, data:p, color:col, lineWidth:2.8, type:'spline', dashStyle:'Dash', marker:{symbol:'diamond', radius:5}});
+  });
+  Highcharts.chart('line', base({
+    xAxis:{tickInterval:2, plotLines:[{value:2014, color:'#fb7185', dashStyle:'Dot', width:2.5, zIndex:4, label:{text:'Quiebre estructural 2014', style:{color:'#fb7185', fontSize:'12.5px', fontWeight:'700'}, rotation:0, y:14}}],
+      plotBands:[{from:LASTOFF, to:2026, color:'rgba(167,139,250,.16)', label:{text:'Horizonte ML', style:{color:'#c4b5fd', fontSize:'12.5px', fontWeight:'700'}}}]},
+    yAxis:{title:{text:'Nacidos vivos por 1.000 hab. (‰)'}}, tooltip:{shared:true, valueSuffix:' ‰', valueDecimals:1}, series:ser
+  }));
+}
+
+/* ---------- Ranking / hitos ---------- */
+function drawRank(){
+  const click = {events:{click(){ if(this.c){ playSound('select'); pick(this.c); }}}};
+  if(S.tab==='A'){
+    const arr = provs().map(j => ({j, v:metric(j.col)})).sort((a,b) => b.v-a.v);
+    Highcharts.chart('rank', base({chart:{type:'bar'}, xAxis:{categories:arr.map(a => a.j.nombre), labels:{style:{color:C().tx, fontSize:'12px', fontWeight:'600'}}}, legend:{enabled:false},
+      yAxis:{title:{text:mLabel()}, plotLines:[{value:metric(ARG.col), color:'#fbbf24', dashStyle:'Dash', width:2.5, zIndex:5, label:{text:'Nacional', style:{color:'#fbbf24', fontSize:'12.5px', fontWeight:'700'}}}]},
+      tooltip:{valueDecimals:1}, plotOptions:{series:{borderWidth:0, borderRadius:4, point:click}},
+      series:[{name:mLabel(), data:arr.map(a => ({y:+a.v.toFixed(2), c:a.j.col, color:a.j.col===S.main?'#fbbf24':'#22d3ee'}))}]}));
+  } else {
+    const L = [ARG, ...provs()], yrs = [[2000,'2000'],[2014,'2014 (Quiebre)'],[LASTOFF,`${LASTOFF} (Actual)`],[2026,'2026 (Proyección ML)']];
+    Highcharts.chart('rank', base({chart:{type:'column'}, xAxis:{categories:L.map(j => j.nombre), labels:{rotation:-55, style:{color:C().tx, fontSize:'11.5px', fontWeight:'600'}}},
+      yAxis:{title:{text:'‰'}}, tooltip:{shared:true, valueDecimals:1, valueSuffix:' ‰'}, plotOptions:{series:{borderWidth:0, borderRadius:3}},
+      series:yrs.map(([y,n],i) => ({name:n, color:['#60a5fa','#fbbf24','#34d399','#a78bfa'][i], data:L.map(j => +V(j.col,y).toFixed(1))}))}));
+  }
+}
+
+/* ---------- Dispersión: ajuste ML y clustering ---------- */
+function drawSc(){
+  const c = S.main, M = MODEL[c], j = byCol[c];
+  if(S.sc===1){
+    const h = [], p = []; YEARS.forEach(y => (y<=LASTOFF ? h : p).push([y, +V(c,y).toFixed(2)]));
+    Highcharts.chart('sc', base({chart:{type:'scatter'}, title:{text:`${j.nombre} · ${NAMES[S.method]}`, style:{color:C().tx, fontSize:'15px', fontWeight:'700'}},
+      subtitle:{text:`y = ${M.m.toFixed(3)}·x + ${M.b.toFixed(1)} · R² = ${M.r2.toFixed(3)} · RMSE = ${M.rmse.toFixed(2)} ‰`, style:{color:'#22d3ee', fontSize:'13.5px', fontWeight:'600'}},
+      xAxis:{tickInterval:2, title:{text:'Año'}}, yAxis:{title:{text:'‰'}}, tooltip:{valueSuffix:' ‰'},
+      series:[{name:'Observado (2000–2024)', data:h, color:'#22d3ee', marker:{radius:5}},
+        {name:'Proyección ML 2025–2026', data:p, color:'#fbbf24', marker:{symbol:'diamond', radius:9}},
+        {type:'line', name:'Recta de regresión ajustada', color:'#a78bfa', lineWidth:2.5, marker:{enabled:false}, enableMouseTracking:false, data:[[M.a, M.m*M.a+M.b],[2026, M.m*2026+M.b]]}]}));
+  } else {
+    const g = {}; Object.keys(RCOL).forEach(k => g[k] = []);
+    provs().forEach(q => { const xs = [], ys = []; for(let y=2014; y<=LASTOFF; y++){ xs.push(y); ys.push(V(q.col,y)); }
+      g[q.region.split(' / ')[0]].push({x:+avgA(rng(q.col,2000,LASTOFF)).toFixed(2), y:+lin(xs,ys).m.toFixed(3), z:V(q.col,LASTOFF), name:q.nombre, c:q.col}); });
+    Highcharts.chart('sc', base({chart:{type:'bubble'}, title:{text:'Clustering demográfico provincial', style:{color:C().tx, fontSize:'15px', fontWeight:'700'}},
+      subtitle:{text:`Tamaño de burbuja = natalidad ${LASTOFF}`, style:{color:C().tx, fontSize:'13px'}},
+      xAxis:{title:{text:'Promedio histórico 2000–'+LASTOFF+' (‰)'}}, yAxis:{title:{text:`Velocidad de caída 2014–${LASTOFF} (‰/año)`}},
+      tooltip:{useHTML:true, pointFormat:'<b>{point.name}</b><br>Promedio: <b>{point.x} ‰</b><br>Pendiente: <b>{point.y} ‰/año</b><br>Natalidad actual: <b>{point.z} ‰</b>'},
+      plotOptions:{series:{point:{events:{click(){ playSound('select'); pick(this.c); }}}}},
+      series:Object.keys(g).map(k => ({name:k, color:RCOL[k], data:g[k], marker:{fillOpacity:.7}}))}));
+  }
+}
+
+/* ---------- Tabla de calor ---------- */
+function drawTable(){
+  const q = $('q').value.toLowerCase(), rows = [ARG, ...provs()].filter(j => j.nombre.toLowerCase().includes(q));
+  if(sortK !== null) rows.sort((a,b) => sortK==='n' ? a.nombre.localeCompare(b.nombre)*sortD : (V(a.col,sortK)-V(b.col,sortK))*sortD);
+  let h = '<thead><tr><th data-k="n">Jurisdicción ⇅</th>' + YEARS.map(y => `<th data-k="${y}" class="${y>LASTOFF?'proj':''}">${y}${y>LASTOFF?'<br>ML':''}</th>`).join('') + '</tr></thead><tbody>';
+  rows.forEach(j => { h += `<tr><td>${j.nombre}</td>` + YEARS.map(y => `<td class="${y>LASTOFF?'proj':''}" style="background:${heat(V(j.col,y))}">${f1(V(j.col,y))}</td>`).join('') + '</tr>'; });
+  $('tbl').innerHTML = h + '</tbody>';
+  $('tbl').querySelectorAll('th').forEach(th => th.onclick = () => { playSound('click'); const k = th.dataset.k; sortD = sortK===k ? -sortD : 1; sortK = k; drawTable(); });
+}
+function exportCSV(){
+  playSound('sync');
+  const cols = ALL.map(j => j.col); let s = 'indice_tiempo,' + cols.join(',') + ',tipo\n';
+  YEARS.forEach(y => { s += `01-01-${y},` + cols.map(c => V(c,y)!=null ? V(c,y).toFixed(1) : '').join(',') + `,${TIPO[y]}\n`; });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([s], {type:'text/csv'}));
+  a.download = 'natalidad_argentina_2000_2026.csv'; a.click();
+}
+
+/* ---------- Render general y controles ---------- */
+function syncUI(){
+  $('from').value = S.from; $('to').value = S.to; $('main').value = S.main; $('region').value = S.region;
+  $('metric').value = S.metric; $('my').value = S.my; $('msl').value = S.my; $('mylab').textContent = S.my;
+  $('myWrap').style.display = S.metric==='anio' ? '' : 'none'; $('method').value = S.method;
+  document.querySelectorAll('[data-r]').forEach(b => b.classList.toggle('on', b.dataset.r === `${S.from},${S.to}`));
+  $('chips').innerHTML = '<span class="mu font-semibold">Comparando en gráfico de líneas:</span>' + S.sel.map(c => `<span class="chip">${byCol[c].nombre} <b data-c="${c}" title="Quitar">×</b></span>`).join('');
+  $('chips').querySelectorAll('b').forEach(b => b.onclick = () => { playSound('click'); S.sel = S.sel.filter(x => x !== b.dataset.c); render(); });
+  $('status').innerHTML = `<span class="live-dot ${src==='g'?'ok':'warn'}"></span>` +
+    (src==='g' ? '<b>Conectado a Google Sheets</b>' : '<b>Dataset Oficial Embebido</b>') +
+    ` · ${stamp} · Proyección: <b>${sheetProj ? 'Sheet' : 'Motor ML JS'}</b>` +
+    (errMsg ? `<br><span style="color:#fb7185">⚠ ${errMsg}</span>` : '');
+  document.body.classList.toggle('light', !S.dark);
+  document.documentElement.classList.toggle('expo-scale', S.expo);
+  $('bExpo').classList.toggle('on', S.expo);
+  $('bSnd').classList.toggle('on', soundEnabled);
+  $('bSnd').textContent = soundEnabled ? '🔊 Sonido' : '🔇 Silencio';
+}
+function safe(id, fn){
+  try { fn(); } catch(e){ console.error('Error en '+id, e);
+    const el = $(id); if(el) el.innerHTML = '<p style="color:#fb7185;padding:1rem;font-size:.95rem">⚠ No se pudo dibujar este gráfico: '+e.message+'<br>Abrí la consola (F12) para ver el detalle.</p>'; if(id==='map') mapC = null; }
+}
+function render(){
+  syncUI();
+  if(typeof Highcharts === 'undefined'){ $('status').textContent = '⚠ Highcharts: ' + (libErr || 'no se cargó') + '. Revisá tu conexión, firewall o bloqueadores de contenido.'; drawKPI(); drawTable(); return; }
+  safe('kpis', drawKPI); safe('map', drawMap); safe('line', drawLine); safe('rank', drawRank); safe('sc', drawSc); safe('tbl', drawTable);
+}
+
+function init(){
+  const yo = () => { let h = ''; for(let y=2000; y<=2026; y++) h += `<option value="${y}">${y}${y>2024?' (ML)':''}</option>`; return h; };
+  $('from').innerHTML = $('to').innerHTML = $('my').innerHTML = yo();
+  $('main').innerHTML = ALL.map(j => `<option value="${j.col}">${j.nombre}</option>`).join('');
+  $('add').innerHTML = '<option value="">+ Agregar provincia…</option>' + ALL.map(j => `<option value="${j.col}">${j.nombre}</option>`).join('');
+
+  $('from').onchange = e => { playSound('click'); S.from = +e.target.value; if(S.from > S.to) S.to = S.from; render(); };
+  $('to').onchange = e => { playSound('click'); S.to = +e.target.value; if(S.to < S.from) S.from = S.to; render(); };
+  document.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { playSound('select'); [S.from, S.to] = b.dataset.r.split(',').map(Number); render(); });
+  $('main').onchange = e => { playSound('select'); S.main = e.target.value; render(); };
+  $('add').onchange = e => { if(e.target.value && !S.sel.includes(e.target.value)){ playSound('select'); S.sel.push(e.target.value); } e.target.value = ''; render(); };
+  $('region').onchange = e => { playSound('click'); S.region = e.target.value; render(); };
+  $('metric').onchange = e => { playSound('click'); S.metric = e.target.value; render(); };
+  $('my').onchange = e => { playSound('click'); S.my = +e.target.value; render(); };
+  $('msl').oninput = e => { S.metric = 'anio'; S.my = +e.target.value; playSound(S.my > LASTOFF ? 'mlTick' : 'tick'); render(); };
+  $('method').onchange = e => { playSound('select'); S.method = e.target.value; project(); render(); };
+
+  $('play').onclick = () => {
+    playSound('select');
+    if(timer){ clearInterval(timer); timer = null; $('play').textContent = '▶ Play'; $('mylab').classList.remove('playing'); return; }
+    $('play').textContent = '⏸ Pausa'; $('mylab').classList.add('playing'); S.metric = 'anio'; if(S.my >= 2026) S.my = 2000;
+    timer = setInterval(() => {
+      S.my++;
+      playSound(S.my > LASTOFF ? 'mlTick' : 'tick');
+      syncUI(); drawMap(); drawKPI();
+      if(S.my >= 2026){ clearInterval(timer); timer = null; $('play').textContent = '▶ Play'; $('mylab').classList.remove('playing'); }
+    }, 700);
+  };
+
+  document.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { playSound('click'); S.tab = b.dataset.t; document.querySelectorAll('[data-t]').forEach(x => x.classList.toggle('on', x===b)); drawRank(); });
+  document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { playSound('click'); S.sc = +b.dataset.s; document.querySelectorAll('[data-s]').forEach(x => x.classList.toggle('on', x===b)); drawSc(); });
+  $('q').oninput = drawTable;
+  $('bCsv').onclick = exportCSV;
+  $('bSync').onclick = () => { playSound('click'); sync(true); };
+  $('auto').onchange = e => { playSound('click'); setAuto(+e.target.value); };
+
+  const sv = lsGet('auto_sec'); if(sv && +sv > 0){ $('auto').value = sv; setAuto(+sv); }
+  const savedExpo = lsGet('expo_scale'); if(savedExpo === '1') S.expo = true;
+  const savedSnd = lsGet('snd_on'); if(savedSnd === '0') soundEnabled = false;
+
+  $('bExpo').onclick = () => {
+    S.expo = !S.expo; lsSet('expo_scale', S.expo ? '1' : '0');
+    playSound('select'); syncUI();
+    setTimeout(() => { Highcharts.charts.forEach(ch => { if(ch) ch.reflow(); }); }, 280);
+  };
+  $('bSnd').onclick = () => {
+    soundEnabled = !soundEnabled; lsSet('snd_on', soundEnabled ? '1' : '0');
+    if(soundEnabled) playSound('select');
+    syncUI();
+  };
+  $('bTheme').onclick = () => { playSound('click'); S.dark = !S.dark; if(mapC){ mapC.destroy(); mapC = null; } render(); };
+  $('bCfg').onclick = () => { playSound('click'); $('url').value = lsGet('apps_url') || ''; $('modal').style.display = 'flex'; };
+  $('mX').onclick = () => { playSound('click'); $('modal').style.display = 'none'; };
+  $('mClr').onclick = () => { playSound('click'); lsSet('apps_url', null); $('url').value = ''; };
+  $('mOk').onclick = () => { playSound('select'); lsSet('apps_url', $('url').value.trim() || null); $('modal').style.display = 'none'; sync(true); };
+
+  window.addEventListener('resize', () => { if(mapC) mapC.reflow(); });
+  sync(false);
+}
+document.addEventListener('DOMContentLoaded', () => loadLibs().then(init));
+</script>
+</body>
+</html>
